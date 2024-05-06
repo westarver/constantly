@@ -1,4 +1,4 @@
-package constantly
+package app
 
 import (
 	"strings"
@@ -7,7 +7,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
-	fynewidgets "github.com/westarver/fyne-widgets"
+	//"github.com/westarver/fynewidgets"
 )
 
 const MainWinTitle = "Constantly"
@@ -17,15 +17,15 @@ func appInfoTab() *fyne.Container {
 	info1 := widget.NewLabel("Application Name")
 	info1.TextStyle = fyne.TextStyle{Bold: true}
 	text1 := widget.NewEntry()
-	text1.OnChanged = func(s string) { AppData.dirty = true }
+	text1.OnChanged = func(s string) { applicationData.dirty = true }
 	info2 := widget.NewLabel("Package Name For Generated Code")
 	info2.TextStyle = fyne.TextStyle{Bold: true}
 	text2 := widget.NewEntry()
-	text2.OnChanged = func(s string) { AppData.dirty = true }
+	text2.OnChanged = func(s string) { applicationData.dirty = true }
 	info3 := widget.NewLabel("Author")
 	info3.TextStyle = fyne.TextStyle{Bold: true}
 	text3 := widget.NewEntry()
-	text3.OnChanged = func(s string) { AppData.dirty = true }
+	text3.OnChanged = func(s string) { applicationData.dirty = true }
 	f := container.New(layout.NewFormLayout(), info1, text1, info2, text2, info3, text3)
 	form1 := container.NewVBox(infoLabel1, f)
 
@@ -41,10 +41,10 @@ func appInfoTab() *fyne.Container {
 		Height: 400,
 	})
 
-	AppData.appName = text1
-	AppData.pkg = text2
-	AppData.author = text3
-	AppData.preview = text4
+	applicationData.appName = text1
+	applicationData.pkg = text2
+	applicationData.author = text3
+	applicationData.preview = text4
 
 	button1 := widget.NewButton("Load From File", func() {
 		loadFromFile()
