@@ -119,9 +119,6 @@ func newColumn(label string) *fyne.Container {
 
 	case BaseID:
 		btn := newContextMenuButton(label, baseIDPopup())
-		btn.OnTapped = func() {
-			applicationData.rows = populatedCells()
-		}
 		c.Add(btn)
 
 	case Suffix:
@@ -155,7 +152,7 @@ func newColumn(label string) *fyne.Container {
 		applicationData.userEntries.assocBtn = btn
 	}
 
-	for i := 0; i < defaultRows; i++ {
+	for i := 0; i < applicationData.rows; i++ {
 		w := widget.NewEntry()
 		if label == Type {
 			if i > 0 {
@@ -164,22 +161,32 @@ func newColumn(label string) *fyne.Container {
 		}
 		if label == BaseID {
 			w.OnSubmitted = func(s string) {
-				for j := 0; j < defaultRows; i++ {
+				for j := 0; j < applicationData.rows; j++ {
+					applicationData.userEntries.columns[label].entries[j+1].FocusGained()
 					if j > applicationData.lastRow {
-						applicationData.lastRow = j
+						applicationData.lastRow++
 						fmt.Println(applicationData.lastRow)
+						w.SetPlaceHolder(fmt.Sprintf("%d", j))
 						break
 					}
 				}
 				applicationData.dirty = true
 			}
 		} else {
-			w.OnSubmitted = func(s string) { applicationData.dirty = true }
+			w.OnSubmitted = func(s string) {
+				for j := 0; j < applicationData.rows; j++ {
+					if j < applicationData.lastRow {
+						applicationData.userEntries.columns[label].entries[j+1].FocusGained()
+					}
+
+					applicationData.dirty = true
+				}
+			}
 		}
+
 		c.Add(w)
 		applicationData.userEntries.columns[label].entries[i] = w
 	}
-
 	return c
 }
 

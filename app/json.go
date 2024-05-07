@@ -75,10 +75,7 @@ func makeheader() *fileheader {
 }
 
 func json2form() {
-	type appd struct {
-		jsonheader fileheader
-	}
-	var header appd
+	var header fileheader
 
 	err := json.Unmarshal(applicationData.jsonData, &applicationData)
 	if err != nil {
@@ -98,17 +95,17 @@ func json2form() {
 	applicationData.userEntries.genValue.SetChecked(header.GenValue)
 	applicationData.userEntries.genMarshal.SetChecked(header.GenMarshal)
 
-	type body struct {
-		formdata []constData
-	}
-	var form body
-	err = json.Unmarshal(applicationData.jsonData, &form)
+	//type body struct {
+	var formdata []constData
+	//}
+	//var form body
+	err = json.Unmarshal(applicationData.jsonData, &formdata)
 	if err != nil {
 		dlg := dialog.NewError(err, applicationData.mainWindow)
 		dlg.Show()
 		return
 	}
-	for i, f := range form.formdata {
+	for i, f := range formdata {
 		applicationData.userEntries.columns[Prefix].entries[i].SetText(f.Prefix)
 		applicationData.userEntries.columns[BaseID].entries[i].SetText(f.BaseId)
 		applicationData.userEntries.columns[Suffix].entries[i].SetText(f.Suffix)

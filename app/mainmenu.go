@@ -17,56 +17,12 @@ const (
 	// refresh the preview screen
 	EditItemPrev = "Refresh Preview"
 	// Copy the preview screen to the system clipboard
-	EditItemCopy = "Copy to clipboard"
+	EditItemCopy = "Copy to Clipboard"
 	// brief description of the app
 	HelpItemAbout = "About"
 	// view the readme file
 	HelpItemHelp = "Help"
 )
-
-func constString(c string) string {
-	switch c {
-	case FileItemOpen:
-		return "FileItemOpen"
-	case FileItemSave:
-		return "FileItemSave"
-	case FileItemGen:
-		return "FileItemGen"
-	case EditItemClear:
-		return "EditItemClear"
-	case EditItemPrev:
-		return "EditItemPrev"
-	case EditItemCopy:
-		return "EditItemCopy"
-	case HelpItemAbout:
-		return "HelpItemAbout"
-	case HelpItemHelp:
-		return "HelpItemHelp"
-	}
-	return ""
-}
-
-func assocString(c string) string {
-	switch c {
-	case FileItemOpen:
-		return "Opens a json definition file"
-	case FileItemSave:
-		return "Saves the current state to a json definition file"
-	case FileItemGen:
-		return "Generates source code from the current  state"
-	case EditItemClear:
-		return "Clear the grid and start fresh with verification if state changed"
-	case EditItemPrev:
-		return "Refresh the preview screen"
-	case EditItemCopy:
-		return "Copy the preview screen to the system clipboard"
-	case HelpItemAbout:
-		return "Brief description of the app"
-	case HelpItemHelp:
-		return "View the readme file"
-	}
-	return ""
-}
 
 func fileItemOpen() *fyne.MenuItem {
 	return fyne.NewMenuItem(FileItemOpen, func() { doFileOpen() })

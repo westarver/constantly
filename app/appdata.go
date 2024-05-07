@@ -7,7 +7,7 @@ import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
-	//"github.com/westarver/fynewidgets"
+	"github.com/westarver/fynewidgets"
 )
 
 const defaultRows = 15
@@ -94,19 +94,19 @@ func newApplicationData() *appData {
 }
 
 // populatedCells() returns the number of rows in the Base Identifier column
+/*
 func populatedCells() int {
 	var num int
 	for n, c := range applicationData.userEntries.columns[BaseID].entries {
 		if c.Text == "" {
-			continue
+			break
 		}
 		num = n
 	}
-	applicationData.lastRow = num
 	return num
 }
-
-func (s appData) reset() {
+*/
+func (s *appData) reset() {
 	s.appName.SetText("")
 	s.pkg.SetText("")
 	s.author.SetText("")
@@ -156,43 +156,3 @@ func verifyClear() {
 		applicationData.reset()
 	}
 }
-
-/*
-// (*SharedapplicationData) App returns a pointer to the unexported struct field app
-func (S *sharedapplicationData) App() fyne.App {
-	return S.app
-}
-
-// (*SharedapplicationData) Mainwindow returns a pointer to the unexported struct field mainWindow
-func (S *SharedapplicationData) mainWindow fyne.Window {
-	return S.mainWindow
-}
-
-// (*SharedapplicationData) Appname returns the value of the unexported struct field appName
-func (S *SharedapplicationData) AppName() string {
-	return S.appName.Text
-}
-
-// (*SharedapplicationData) LoadedPath returns the value of the unexported struct field loadedPath
-func (S *SharedapplicationData) LoadedPath() string {
-	return S.loadedPath
-}
-*/
-/*
-type SharedapplicationData struct {
-	app         fyne.App
-	mainWindow  fyne.Window
-	preview     *fynewidgets.ReadOnlyEntry
-	appName     *widget.Entry
-	pkg         *widget.Entry
-	author      *widget.Entry
-	val         *contextMenuButton
-	assoc       *contextMenuButton
-	loadedPath  string
-	jsonData    []byte
-	userEntries *userEntries
-	rows        int
-	lastRow     int
-	Dirty       bool
-}
-*/

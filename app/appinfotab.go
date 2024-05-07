@@ -7,7 +7,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
-	//"github.com/westarver/fynewidgets"
+	"github.com/westarver/fynewidgets"
 )
 
 const MainWinTitle = "Constantly"
@@ -17,15 +17,15 @@ func appInfoTab() *fyne.Container {
 	info1 := widget.NewLabel("Application Name")
 	info1.TextStyle = fyne.TextStyle{Bold: true}
 	text1 := widget.NewEntry()
-	text1.OnChanged = func(s string) { applicationData.dirty = true }
+	text1.OnSubmitted = func(s string) { applicationData.dirty = true }
 	info2 := widget.NewLabel("Package Name For Generated Code")
 	info2.TextStyle = fyne.TextStyle{Bold: true}
 	text2 := widget.NewEntry()
-	text2.OnChanged = func(s string) { applicationData.dirty = true }
+	text2.OnSubmitted = func(s string) { applicationData.dirty = true }
 	info3 := widget.NewLabel("Author")
 	info3.TextStyle = fyne.TextStyle{Bold: true}
 	text3 := widget.NewEntry()
-	text3.OnChanged = func(s string) { applicationData.dirty = true }
+	text3.OnSubmitted = func(s string) { applicationData.dirty = true }
 	f := container.New(layout.NewFormLayout(), info1, text1, info2, text2, info3, text3)
 	form1 := container.NewVBox(infoLabel1, f)
 

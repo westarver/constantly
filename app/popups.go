@@ -9,8 +9,7 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 	"github.com/mgutz/str"
-
-	//"github.com/westarver/fynewidgets"
+	"github.com/westarver/fynewidgets"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
