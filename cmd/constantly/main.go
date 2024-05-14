@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/westarver/constantly/app"
+	"github.com/westarver/constantly"
 )
 
 func main() {
-	app.Run()
+	constantly.Run()
 }

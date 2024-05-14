@@ -57,32 +57,34 @@ func assocPopup() *fyne.Menu {
 
 func menuItemClear(label string) *fyne.MenuItem {
 	return fyne.NewMenuItem("Clear", func() {
-		rows := applicationData.rows
-		for i := 0; i < rows; i++ {
-			applicationData.userEntries.columns[label].entries[i].SetText("")
+		r := LastRow() + 1
+		for i := 0; i < r; i++ {
+			SetCellText(label, i, "")
 		}
 	})
 }
 
 func menuItemCopy(label string) *fyne.MenuItem {
 	return fyne.NewMenuItem("Copy down", func() {
-		for i := 0; i < applicationData.rows; i++ {
-			applicationData.userEntries.columns[label].entries[i].SetText(applicationData.userEntries.columns[label].entries[0].Text)
+		r := LastRow() + 1
+		for i := 0; i < r; i++ {
+			SetCellText(label, i, CellText(label, 0))
 		}
 	})
 }
 
 func menuItemCopyToLimit(label string) *fyne.MenuItem {
 	num := fynewidgets.NewNumericalEntry()
+
 	fi := widget.NewFormItem("Copy down to:", num)
 	var fis = []*widget.FormItem{fi}
 
 	return fyne.NewMenuItem("Copy to limit", func() {
 		var limit int
-		num.OnSubmitted = func(n string) {
+		num.OnChanged = func(n string) {
 			limit, _ = strconv.Atoi(n)
-			if limit > applicationData.lastRow || limit < 1 {
-				limit = applicationData.lastRow
+			if limit > ApplicationData.rows || limit < 1 {
+				limit = ApplicationData.rows
 			}
 		}
 
@@ -90,11 +92,12 @@ func menuItemCopyToLimit(label string) *fyne.MenuItem {
 			func(b bool) {
 				if b {
 					for i := 0; i < limit; i++ {
-						applicationData.userEntries.columns[label].entries[i].SetText(applicationData.userEntries.columns[label].entries[0].Text)
+						SetCellText(label, i, CellText(label, 0))
 					}
+					SetLastRow()
 				}
 			},
-			applicationData.mainWindow)
+			MainWindow())
 		dlg.Show()
 	})
 }
@@ -105,33 +108,39 @@ func menuItemCaseXform(label string) *fyne.MenuItem {
 		"Case transforms",
 		fyne.NewMenuItem("To upper",
 			func() {
-				for i := 0; i < applicationData.rows; i++ {
-					applicationData.userEntries.columns[label].entries[i].SetText(strings.ToUpper(applicationData.userEntries.columns[label].entries[i].Text))
+				r := LastRow() + 1
+				for i := 0; i < r; i++ {
+					SetCellText(label, i, strings.ToUpper(CellText(label, i)))
+					fmt.Println(CellText(label, i))
 				}
 			}),
 		fyne.NewMenuItem("To lower",
 			func() {
-				for i := 0; i < applicationData.rows; i++ {
-					applicationData.userEntries.columns[label].entries[i].SetText(strings.ToLower(applicationData.userEntries.columns[label].entries[i].Text))
+				r := LastRow() + 1
+				for i := 0; i < r; i++ {
+					SetCellText(label, i, strings.ToLower(CellText(label, i)))
 				}
 			}),
 		fyne.NewMenuItem("To title",
 			func() {
-				for i := 0; i < applicationData.rows; i++ {
+				r := LastRow() + 1
+				for i := 0; i < r; i++ {
 					tcaser := cases.Title(language.AmericanEnglish)
-					applicationData.userEntries.columns[label].entries[i].SetText(tcaser.String(applicationData.userEntries.columns[label].entries[i].Text))
+					SetCellText(label, i, tcaser.String(CellText(label, i)))
 				}
 			}),
 		fyne.NewMenuItem("To snake",
 			func() {
-				for i := 0; i < applicationData.rows; i++ {
-					applicationData.userEntries.columns[label].entries[i].SetText(str.Underscore(str.Camelize(applicationData.userEntries.columns[label].entries[i].Text)))
+				r := LastRow() + 1
+				for i := 0; i < r; i++ {
+					SetCellText(label, i, str.Underscore(str.Camelize(CellText(label, i))))
 				}
 			}),
 		fyne.NewMenuItem("To camel",
 			func() {
-				for i := 0; i < applicationData.rows; i++ {
-					applicationData.userEntries.columns[label].entries[i].SetText(str.Camelize(applicationData.userEntries.columns[label].entries[i].Text))
+				r := LastRow() + 1
+				for i := 0; i < r; i++ {
+					SetCellText(label, i, str.Camelize(CellText(label, i)))
 				}
 			}),
 	)
@@ -141,67 +150,72 @@ func menuItemCaseXform(label string) *fyne.MenuItem {
 
 func menuItemXiota(label string) *fyne.MenuItem {
 	return fyne.NewMenuItem("Copy text down + iota", func() {
-		start := applicationData.userEntries.columns[label].entries[0].Text
-		for i := 0; i < applicationData.rows; i++ {
-			applicationData.userEntries.columns[label].entries[i].SetText(start + fmt.Sprintf("%d", i))
+		start := CellText(label, 0)
+		r := LastRow() + 1
+		for i := 0; i < r; i++ {
+			SetCellText(label, i, start+fmt.Sprintf("%d", i))
 		}
 	})
 }
 
 func menuItemCatIota(label string) *fyne.MenuItem {
 	return fyne.NewMenuItem("Concatenate text + iota", func() {
-		for i := 0; i < applicationData.rows; i++ {
-			applicationData.userEntries.columns[label].entries[i].SetText(applicationData.userEntries.columns[label].entries[i].Text + fmt.Sprintf("%d", i))
+		r := LastRow() + 1
+		for i := 0; i < r; i++ {
+			SetCellText(label, i, CellText(label, i)+fmt.Sprintf("%d", i))
 		}
 	})
 }
 
 func menuItemXalpha(label string) *fyne.MenuItem {
 	return fyne.NewMenuItem("Copy text down + alpha++", func() {
-		start := applicationData.userEntries.columns[label].entries[0].Text
-		for i := 0; i < applicationData.rows; i++ {
-			applicationData.userEntries.columns[label].entries[i].SetText(start + string(rune('A'+i)))
+		start := CellText(label, 0)
+		r := LastRow() + 1
+		for i := 0; i < r; i++ {
+			SetCellText(label, i, start+string(rune('A'+i)))
 		}
 	})
 }
 
 func menuItemCatAlpha(label string) *fyne.MenuItem {
 	return fyne.NewMenuItem("Concatenate text + alpha++", func() {
-		for i := 0; i < applicationData.rows; i++ {
-			applicationData.userEntries.columns[label].entries[i].SetText(applicationData.userEntries.columns[label].entries[i].Text + string(rune('A'+i)))
+		r := LastRow() + 1
+		for i := 0; i < r; i++ {
+			SetCellText(label, i, CellText(label, i)+string(rune('A'+i)))
 		}
 	})
 }
 
 func menuItemXassoc(label string) *fyne.MenuItem {
 	return fyne.NewMenuItem("Copy text + assoc data", func() {
-		start := applicationData.userEntries.columns[label].entries[0].Text
-		for i := 0; i < applicationData.rows; i++ {
-			applicationData.userEntries.columns[label].entries[i].SetText(start + applicationData.userEntries.columns[Assoc].entries[i].Text)
+		start := CellText(label, 0)
+		r := LastRow() + 1
+		for i := 0; i < r; i++ {
+			CellAt(label, i).SetText(start + CellText(Assoc, i))
 		}
 	})
 }
 
 func menuItemCatAssoc(label string) *fyne.MenuItem {
 	return fyne.NewMenuItem("Concatenate text + assoc data", func() {
-		for i := 0; i < applicationData.rows; i++ {
-			applicationData.userEntries.columns[label].entries[i].SetText(applicationData.userEntries.columns[label].entries[i].Text + applicationData.userEntries.columns[Assoc].entries[i].Text)
+		r := LastRow() + 1
+		for i := 0; i < r; i++ {
+			CellAt(label, i).SetText(CellText(label, i) + CellText(Assoc, i))
 		}
 	})
 }
 
 func menuItemToggleValueSize() *fyne.MenuItem {
 	return fyne.NewMenuItem("Toggle size", func() {
-		applicationData.userEntries.valueshort = !applicationData.userEntries.valueshort
-		if applicationData.userEntries.valueshort {
-			applicationData.userEntries.valueBtn.Text = ValueShortText
-			applicationData.userEntries.assocBtn.Text = AssocLongText
+		ApplicationData.valueshort = !ApplicationData.valueshort
+		if ApplicationData.valueshort {
+			ApplicationData.val.Text = ValueShortText
+			ApplicationData.assoc.Text = AssocLongText
 		} else {
-			applicationData.userEntries.valueBtn.Text = ValueLongText
-			applicationData.userEntries.assocBtn.Text = AssocShortText
+			ApplicationData.val.Text = ValueLongText
+			ApplicationData.assoc.Text = AssocShortText
 		}
-		applicationData.val.Refresh()
-		applicationData.assoc.Refresh()
-		//fyne.CurrentApp().Driver().CanvasForObject(applicationData.userEntries.valueBtn).Content().Refresh()
+		ApplicationData.val.Refresh()
+		ApplicationData.assoc.Refresh()
 	})
 }

@@ -6,8 +6,11 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
-
 	"fyne.io/fyne/v2/widget"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
+
+	"github.com/westarver/constantly/bridge"
 )
 
 const (
@@ -39,27 +42,27 @@ func firstColumn(rows int) *fyne.Container {
 func lastColumn() *fyne.Container {
 	sel := widget.NewSelectEntry([]string{"int", "uint", "byte", "int16", "uint16", "int32", "uint32", "int64", "uint64", "float32", "float64", "string"})
 	sel.SetPlaceHolder("int")
-	applicationData.userEntries.underlying = sel
+	UserEntries().underlying = sel
 	ent := widget.NewEntry()
 	ent.TextStyle.Monospace = true
-	ent.SetPlaceHolder(sel.Text)
-	ent.OnSubmitted = func(s string) {
-		applicationData.userEntries.columns[Type].entries[0].SetText(s)
-		applicationData.dirty = true
+	t := sel.Text
+	if len(t) == 0 {
+		t = sel.PlaceHolder
+	}
+	typeWrap := title(t)
+	ent.SetText(typeWrap)
+	UserEntries().consType = ent
+	ent.OnChanged = func(s string) {
+		CellAt(Type, 0).SetText(s)
+		CellAt(Type, 0).Entry().Refresh()
+		SetDirty(true)
 	}
 
-	sel.OnSubmitted = func(s string) {
-		applicationData.dirty = true
-		applicationData.userEntries.underlying = sel
-
-		// The default typename that wraps the go type
-		// selected from the dropdown is <type>+"Wrap"
-		// Edit to suit
-		typeWrap := sel.Text + "Wrap"
-		ent.SetText(typeWrap)
+	sel.OnChanged = func(s string) {
+		SetDirty(true)
+		UserEntries().consType.SetText(title(s))
 	}
 
-	applicationData.userEntries.consType = ent
 	lbl := widget.NewLabelWithStyle("type", fyne.TextAlignLeading, fyne.TextStyle{Bold: false, Monospace: true})
 	split := container.NewHSplit(
 		ent,
@@ -72,31 +75,26 @@ func lastColumn() *fyne.Container {
 	)
 
 	chk1 := widget.NewCheck("Generate method to return string", func(b bool) {
-		applicationData.userEntries.genStr.SetChecked(b)
-		applicationData.dirty = true
+		SetDirty(true)
 	})
 	chk2 := widget.NewCheck("Generate method to map assoc data", func(b bool) {
-		applicationData.userEntries.genAssoc.SetChecked(b)
-		applicationData.dirty = true
+		SetDirty(true)
 	})
 	chk3 := widget.NewCheck("Generate comment from assoc data", func(b bool) {
-		applicationData.userEntries.genComment.SetChecked(b)
-		applicationData.dirty = true
+		SetDirty(true)
 	})
 	chk4 := widget.NewCheck("Generate method to return value", func(b bool) {
-		applicationData.userEntries.genValue.SetChecked(b)
-		applicationData.dirty = true
+		SetDirty(true)
 	})
 	chk5 := widget.NewCheck("Generate Marshal/UnMarshal methods", func(b bool) {
-		applicationData.userEntries.genMarshal.SetChecked(b)
-		applicationData.dirty = true
+		SetDirty(true)
 	})
 
-	applicationData.userEntries.genStr = chk1
-	applicationData.userEntries.genAssoc = chk2
-	applicationData.userEntries.genComment = chk3
-	applicationData.userEntries.genValue = chk4
-	applicationData.userEntries.genMarshal = chk5
+	UserEntries().genStr = chk1
+	UserEntries().genAssoc = chk2
+	UserEntries().genComment = chk3
+	UserEntries().genValue = chk4
+	UserEntries().genMarshal = chk5
 
 	v := container.NewVBox(
 		chk1,
@@ -104,7 +102,7 @@ func lastColumn() *fyne.Container {
 		chk3,
 		chk4,
 		chk5,
-		widget.NewButton("Generate Source File", func() { writeConstants() }),
+		widget.NewButton("Generate Source File", func() { bridge.WriteConstants() }),
 	)
 	return container.NewVBox(h, v)
 }
@@ -128,31 +126,31 @@ func newColumn(label string) *fyne.Container {
 	case Type:
 		btn := newContextMenuButton(label, typePopup())
 		btn.OnTapped = func() {
-			cons := applicationData.userEntries.consType.Text
-			if len(cons) == 0 {
-				cons = applicationData.userEntries.consType.PlaceHolder
+			typ := ConstType()
+			if len(typ) == 0 {
+				typ = UnderlyingType()
 			}
-			applicationData.userEntries.columns[label].entries[0].SetText(cons)
+			SetCellText(label, 0, typ)
 		}
 		c.Add(btn)
 
 	case Value:
 		btn := newContextMenuButton(Value, valuePopup())
 		btn.OnTapped = func() {
-			if applicationData.userEntries.columns[Value].entries[0].Text == "" {
-				applicationData.userEntries.columns[Value].entries[0].SetText("iota")
+			if CellAt(Value, 0).Text() == "" {
+				SetCellText(label, 0, "iota")
 			}
 		}
 		c.Add(btn)
-		applicationData.userEntries.valueBtn = btn
+		ApplicationData.val = btn
 
 	case Assoc:
 		btn := newContextMenuButton(AssocLongText, assocPopup())
 		c.Add(btn)
-		applicationData.userEntries.assocBtn = btn
+		ApplicationData.assoc = btn
 	}
 
-	for i := 0; i < applicationData.rows; i++ {
+	for i := 0; i < ApplicationData.rows; i++ {
 		w := widget.NewEntry()
 		if label == Type {
 			if i > 0 {
@@ -160,32 +158,21 @@ func newColumn(label string) *fyne.Container {
 			}
 		}
 		if label == BaseID {
-			w.OnSubmitted = func(s string) {
-				for j := 0; j < applicationData.rows; j++ {
-					applicationData.userEntries.columns[label].entries[j+1].FocusGained()
-					if j > applicationData.lastRow {
-						applicationData.lastRow++
-						fmt.Println(applicationData.lastRow)
-						w.SetPlaceHolder(fmt.Sprintf("%d", j))
-						break
-					}
-				}
-				applicationData.dirty = true
+			w.OnChanged = func(s string) {
+				SetLastRow()
+				ApplicationData.dirty = true
 			}
 		} else {
-			w.OnSubmitted = func(s string) {
-				for j := 0; j < applicationData.rows; j++ {
-					if j < applicationData.lastRow {
-						applicationData.userEntries.columns[label].entries[j+1].FocusGained()
-					}
-
-					applicationData.dirty = true
-				}
+			w.OnChanged = func(s string) {
+				ApplicationData.dirty = true
 			}
 		}
 
+		CellAt(label, i).col = label
+		CellAt(label, i).row = i
+		//w.Text = fmt.Sprintf("%s  %d", label, i)
+		CellAt(label, i).entry = w
 		c.Add(w)
-		applicationData.userEntries.columns[label].entries[i] = w
 	}
 	return c
 }
@@ -194,27 +181,30 @@ func columnGrid() *fyne.Container {
 	rightCol := lastColumn()
 	last2 := container.New(
 		layout.NewFormLayout(),
-		newColumn(Value), // applicationData.rows),
-		newColumn(Assoc), // applicationData.rows),
+		newColumn(Value),
+		newColumn(Assoc),
 	)
-	applicationData.val = last2.Objects[0].(*fyne.Container).Objects[0].(*contextMenuButton)
-	applicationData.assoc = last2.Objects[1].(*fyne.Container).Objects[0].(*contextMenuButton)
 
 	table := container.NewMax(container.NewHBox(
-		firstColumn(defaultRows),
+		firstColumn(ApplicationData.rows),
 		container.New(
 			layout.NewFormLayout(),
-			newColumn(Prefix), // applicationData.rows),
-			newColumn(BaseID), // applicationData.rows),
+			newColumn(Prefix),
+			newColumn(BaseID),
 		),
 		container.New(
 			layout.NewFormLayout(),
-			newColumn(Suffix), // applicationData.rows),
-			newColumn(Type),   // applicationData.rows),
+			newColumn(Suffix),
+			newColumn(Type),
 		),
 		last2,
 		rightCol,
 	))
 
 	return container.NewMax(container.NewScroll(table))
+}
+
+func title(s string) string {
+	tcaser := cases.Title(language.AmericanEnglish)
+	return tcaser.String(s)
 }

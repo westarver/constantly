@@ -7,25 +7,25 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
+
+	"github.com/westarver/constantly/bridge"
 	"github.com/westarver/fynewidgets"
 )
-
-const MainWinTitle = "Constantly"
 
 func appInfoTab() *fyne.Container {
 	infoLabel1 := widget.NewLabelWithStyle("Application Data", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
 	info1 := widget.NewLabel("Application Name")
 	info1.TextStyle = fyne.TextStyle{Bold: true}
 	text1 := widget.NewEntry()
-	text1.OnSubmitted = func(s string) { applicationData.dirty = true }
+	text1.OnSubmitted = func(s string) { SetDirty(true) }
 	info2 := widget.NewLabel("Package Name For Generated Code")
 	info2.TextStyle = fyne.TextStyle{Bold: true}
 	text2 := widget.NewEntry()
-	text2.OnSubmitted = func(s string) { applicationData.dirty = true }
+	text2.OnSubmitted = func(s string) { SetDirty(true) }
 	info3 := widget.NewLabel("Author")
 	info3.TextStyle = fyne.TextStyle{Bold: true}
 	text3 := widget.NewEntry()
-	text3.OnSubmitted = func(s string) { applicationData.dirty = true }
+	text3.OnSubmitted = func(s string) { SetDirty(true) }
 	f := container.New(layout.NewFormLayout(), info1, text1, info2, text2, info3, text3)
 	form1 := container.NewVBox(infoLabel1, f)
 
@@ -41,19 +41,19 @@ func appInfoTab() *fyne.Container {
 		Height: 400,
 	})
 
-	applicationData.appName = text1
-	applicationData.pkg = text2
-	applicationData.author = text3
-	applicationData.preview = text4
+	ApplicationData.appName = text1
+	ApplicationData.pkg = text2
+	ApplicationData.author = text3
+	ApplicationData.preview = text4
 
 	button1 := widget.NewButton("Load From File", func() {
-		loadFromFile()
+		bridge.LoadFromFile()
 	})
 	button2 := widget.NewButton("Save", func() {
-		saveToFile(true)
+		bridge.SaveToFile(true)
 	})
-	button3 := widget.NewButton("Generate Source File", func() { writeConstants() })
-	button4 := widget.NewButton("Reload", func() { reloadFile() })
+	button3 := widget.NewButton("Generate Source File", func() { bridge.WriteConstants() })
+	button4 := widget.NewButton("Reload", func() { bridge.ReloadFile() })
 	btnbox := container.NewHBox(button1, button2, layout.NewSpacer(), button4, button3)
 	return container.NewVBox(form1, divider1, infoLabel2, preview, layout.NewSpacer(), divider2, btnbox)
 }

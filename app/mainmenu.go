@@ -3,6 +3,7 @@ package app
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/dialog"
+	"github.com/westarver/constantly/bridge"
 )
 
 const (
@@ -57,23 +58,23 @@ func helpItemHelp() *fyne.MenuItem {
 }
 
 func doFileOpen() {
-	loadFromFile()
+	bridge.LoadFromFile()
 }
 
 func doFileSave() {
-	saveToFile(true) // true that its json
+	bridge.SaveToFile(true) // true that its json
 }
 
 func doFileGen() {
-	writeConstants()
+	bridge.WriteConstants()
 }
 
 func doEditClear() {
-	verifyClear()
+	VerifyClear()
 }
 
 func doEditPreview() {
-	refreshPreview()
+	bridge.RefreshPreview()
 }
 func doEditCopy() {
 	copyToClipBoard()
@@ -85,7 +86,7 @@ Constantly will help you create blocks of constants with
 optional related functions with the bare minimum of typing.
 Featuring a grid layout with copying, concatenation and       
 string tranformation.                                              `
-	dlg := dialog.NewInformation("About Constantly", about, applicationData.mainWindow)
+	dlg := dialog.NewInformation("About Constantly", about, MainWindow())
 	dlg.Show()
 }
 
@@ -96,18 +97,18 @@ optional related functions with the bare minimum of typing.
 Featuring a grid layout with copying, concatenation and       
 string tranformation.                                              `
 
-	dlg := dialog.NewInformation("Help", about, applicationData.mainWindow)
+	dlg := dialog.NewInformation("Help", about, MainWindow())
 	dlg.Show()
 }
 
-func setMainMenu() {
+func SetMainMenu() {
 	file := fyne.NewMenu("File", fileItemOpen(), fileItemSave(), fileItemGen())
 	edit := fyne.NewMenu("Edit", editItemClear(), editItemPrev(), editItemCopy())
 	help := fyne.NewMenu("Help", helpItemAbout(), helpItemHelp())
 	main := fyne.NewMainMenu(file, edit, help)
-	applicationData.mainWindow.SetMainMenu(main)
+	MainWindow().SetMainMenu(main)
 }
 
 func copyToClipBoard() {
-	applicationData.mainWindow.Clipboard().SetContent(previewString())
+	MainWindow().Clipboard().SetContent(bridge.PreviewString())
 }
